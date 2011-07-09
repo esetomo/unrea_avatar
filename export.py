@@ -15,7 +15,7 @@ for obj in scene.objects:
     if obj.name != name:
         scene.objects.unlink(obj)
 
-bpy.ops.object.select_all(action="SELECT")
+bpy.ops.object.select_name(name=name)
 for mod in bpy.context.active_object.modifiers:
     bpy.ops.object.modifier_apply(modifier=mod.name)
 
