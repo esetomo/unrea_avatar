@@ -2,7 +2,8 @@
 
 require 'rake/clean'
 
-BLENDER = 'D:\Program Files\Blender Foundation\Blender\blender.exe'
+# BLENDER = 'D:\Program Files\Blender Foundation\Blender\blender.exe'
+BLENDER = 'D:\Users\s-tomo\Downloads\1940_64bit-38255\64bit-38255\blender.exe'
 
 CLEAN.add('out/')
 
