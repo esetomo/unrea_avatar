@@ -2,8 +2,12 @@
 
 require 'rake/clean'
 
-# BLENDER = 'D:\Program Files\Blender Foundation\Blender\blender.exe'
-BLENDER = 'D:\Users\s-tomo\Downloads\2164_64bit-38492\64bit-38492\blender.exe'
+case RUBY_PLATFORM
+when /linux/
+  BLENDER = '~/work/blender-svn/build/bin/blender'
+else
+  BLENDER = 'D:\Users\s-tomo\Downloads\2164_64bit-38492\64bit-38492\blender.exe'
+end
 
 OUTPUTS = ['out/unrea_body.dae', 'out/unrea_head.dae']
 
