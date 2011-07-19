@@ -3,7 +3,7 @@
 require 'rake/clean'
 
 # BLENDER = 'D:\Program Files\Blender Foundation\Blender\blender.exe'
-BLENDER = 'D:\Users\s-tomo\Downloads\1940_64bit-38255\64bit-38255\blender.exe'
+BLENDER = 'D:\Users\s-tomo\Downloads\2164_64bit-38492\64bit-38492\blender.exe'
 
 OUTPUTS = ['out/unrea_body.dae', 'out/unrea_head.dae']
 
