@@ -9,7 +9,8 @@ else
   BLENDER = 'D:\Users\s-tomo\Downloads\2164_64bit-38492\64bit-38492\blender.exe'
 end
 
-OUTPUTS = ['out/unrea_body.dae', 'out/unrea_head.dae']
+# OUTPUTS = ['out/unrea_body.dae', 'out/unrea_head.dae']
+OUTPUTS = ['out/unrea_body.dae']
 
 CLEAN.add(OUTPUTS)
 
