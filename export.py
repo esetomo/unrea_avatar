@@ -18,7 +18,7 @@ name = os.path.basename(filepath).replace(".dae", "")
 bpy.ops.object.mode_set(mode="OBJECT")
 
 bpy.ops.object.select_name(name=name)
-bpy.ops.object.vertex_group_normalize_all(lock_active=False)
+# bpy.ops.object.vertex_group_normalize_all(lock_active=False)
 
 for mod in bpy.context.active_object.modifiers:
     if isinstance(mod, bpy.types.ArmatureModifier):
