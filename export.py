@@ -29,4 +29,5 @@ for mod in bpy.context.active_object.modifiers:
         bpy.ops.object.modifier_apply(modifier=mod.name)
 
 bpy.ops.wm.collada_export(filepath=filepath,selected=True)
+bpy.ops.export_scene.fbx(filepath=name+".fbx",use_selection=True)
 bpy.ops.wm.quit_blender()

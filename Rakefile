@@ -9,15 +9,16 @@ else
   BLENDER = 'D:\Users\s-tomo\Downloads\2164_64bit-38492\64bit-38492\blender.exe'
 end
 
-# OUTPUTS = ['out/unrea_body.dae', 'out/unrea_head.dae']
-OUTPUTS = ['out/unrea_body.dae']
+OUTPUTS = ['out/unrea_body.dae', 'out/unrea_head.dae']
 
 CLEAN.add(OUTPUTS)
+CLEAN.add(OUTPUTS.map{|o| o.sub(/\.dae/, ".fbx")})
 
 task :default => OUTPUTS
 
 OUTPUTS.each do |output|
   file output => ['unrea.blend', 'export.py'] do |t|
-    system("#{BLENDER} --background #{t.prerequisites[0]} --python #{t.prerequisites[1]} -- #{t.name}")
+    # system("#{BLENDER} --background #{t.prerequisites[0]} --python #{t.prerequisites[1]} -- #{t.name}")
+    system("#{BLENDER} #{t.prerequisites[0]} --python #{t.prerequisites[1]} -- #{t.name}")
   end
 end
