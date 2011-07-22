@@ -18,8 +18,8 @@ OBJECTS.each do |obj|
   dae25 = "out/#{obj}25.dae"
   fbx = "out/#{obj}.fbx"
 
-  task :default => dae24
-  # task :default => dae25
+  # task :default => dae24
+  task :default => dae25
 
   file dae24 => ['unrea.blend', 'export24.py'] do |t|
     system("#{BLENDER24} -P #{t.prerequisites[1]} -- #{t.name}")
