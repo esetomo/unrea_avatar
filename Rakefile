@@ -2,12 +2,8 @@
 
 require 'rake/clean'
 
-case RUBY_PLATFORM
-when /linux/
-  BLENDER = '~/work/blender-svn/build/bin/blender'
-else
-  BLENDER = 'D:\Users\s-tomo\work\blender-svn\install\win32-vc\blender.exe'
-end
+# BLENDER = '~/work/blender-svn/build/bin/blender'
+BLENDER = 'D:\Users\s-tomo\work\blender-svn\install\win32-vc\blender.exe'
 
 OBJECTS = ['unrea_body', 'unrea_head']
 
