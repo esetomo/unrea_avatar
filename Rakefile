@@ -3,12 +3,13 @@
 require 'rake/clean'
 
 # BLENDER = '~/work/blender-svn/build/bin/blender'
-BLENDER = 'D:\Users\s-tomo\work\blender-svn\install\win32-vc\blender.exe'
+# BLENDER = 'D:\Users\s-tomo\work\blender-svn\install\win32-vc\blender.exe'
+BLENDER = 'D:\Users\s-tomo\Downloads\2164_64bit-38492\64bit-38492\blender.exe'
 
 OBJECTS = ['unrea_body', 'unrea_head']
 
 OBJECTS.each do |obj|
-  dae = "out/#{obj}25.dae"
+  dae = "out/#{obj}.dae"
 
   task :default => dae
 

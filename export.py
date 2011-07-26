@@ -13,7 +13,7 @@ def modify_armature():
     bpy.ops.object.mode_set(mode="OBJECT")
 
 filepath = sys.argv[-1]
-name = os.path.basename(filepath).replace("25.dae", "")
+name = os.path.basename(filepath).replace(".dae", "")
 
 bpy.ops.object.mode_set(mode="OBJECT")
 
