@@ -22,6 +22,8 @@ def build_bones(armature, parent, parent_bone):
             bone.head = v
         bone.tail = (bone.head.x, bone.head.y + 0.1, bone.head.z)
         bone.roll = 0
+        bone.use_inherit_scale = False
+        bone.use_inherit_rotation = False
         build_bones(armature, elem, bone)
 
 def import_skeleton():
@@ -73,7 +75,6 @@ def create_param_empty(param, z):
 
 def add_scale_constraint(scale, value_min, value_max, bone, empty):
     c = bone.constraints.new("TRANSFORM")
-    c = bone.constraints.new("TRANSFORM")
     c.from_min_y = 0
     c.from_max_y = 1
     c.map_from = "LOCATION"
@@ -82,13 +83,13 @@ def add_scale_constraint(scale, value_min, value_max, bone, empty):
     c.map_to_y_from = "Y"
     c.map_to_z_from = "Y"
     c.target = empty
-    c.to_min_x = 1.0 + scale[0] * value_min
-    c.to_max_x = 1.0 + scale[0] * value_max
-    c.to_min_y = 1.0 + scale[1] * value_min
-    c.to_max_y = 1.0 + scale[1] * value_max
-    c.to_min_z = 1.0 + scale[2] * value_min
-    c.to_max_z = 1.0 + scale[2] * value_max
-    # TODO impl
+    c.influence = 0.1
+    c.to_min_x = 1.0 + scale[0] * value_min * 10
+    c.to_max_x = 1.0 + scale[0] * value_max * 10
+    c.to_min_y = 1.0 + scale[1] * value_min * 10
+    c.to_max_y = 1.0 + scale[1] * value_max * 10
+    c.to_min_z = 1.0 + scale[2] * value_min * 10
+    c.to_max_z = 1.0 + scale[2] * value_max * 10.
 
 def add_offset_constraint(offset, value_min, value_max, bone, empty):
     c = bone.constraints.new("TRANSFORM")
@@ -100,7 +101,13 @@ def add_offset_constraint(offset, value_min, value_max, bone, empty):
     c.map_to_y_from = "Y"
     c.map_to_z_from = "Y"
     c.target = empty
-    # TODO impl
+    c.influence = 0.1
+    c.to_min_x = bone.location.x + offset[0] * value_min * 10
+    c.to_max_x = bone.location.x + offset[0] * value_max * 10
+    c.to_min_y = bone.location.y + offset[1] * value_min * 10
+    c.to_max_y = bone.location.y + offset[1] * value_max * 10
+    c.to_min_z = bone.location.z + offset[2] * value_min * 10
+    c.to_max_z = bone.location.z + offset[2] * value_max * 10
 
 def import_param(armature_ob, param, z):
     skeleton = param.find("param_skeleton")
@@ -136,4 +143,3 @@ def import_lad(armature_ob):
         
 armature_ob = import_skeleton()
 import_lad(armature_ob)
-
