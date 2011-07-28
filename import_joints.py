@@ -1,5 +1,6 @@
 import bpy
 import xml.etree.ElementTree
+import math
 
 CHARACTER_DIR = "/Program Files (x86)/SecondLifeViewer2/character/"
 
@@ -31,6 +32,51 @@ def import_skeleton():
     bpy.ops.object.mode_set(mode="EDIT")
 
     build_bones(armature, root, None)
+    
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return armature_ob
 
-import_skeleton()
-bpy.ops.object.mode_set(mode="OBJECT")
+def import_param(armature_ob, param, z):
+    skeleton = param.find("param_skeleton")
+    if skeleton is None:
+        return
+    
+    name = param.get("name")
+    armature = armature_ob.data
+    empty = bpy.data.objects.new(name, None)
+    bpy.context.scene.objects.link(empty)
+    empty.scale = (0.03, 0.03, 0.03)
+    empty.location = (0, 0, z)
+    limit_location = empty.constraints.new("LIMIT_LOCATION")
+    limit_location.min_x = 0
+    limit_location.use_min_x = True
+    limit_location.max_x = 0
+    limit_location.use_max_x = True
+    limit_location.min_y = 0
+    limit_location.use_min_y = True
+    limit_location.max_y = 1
+    limit_location.use_max_y = True
+    limit_location.min_z = z
+    limit_location.use_min_z = True
+    limit_location.max_z = z
+    limit_location.use_max_z = True
+    
+    label = bpy.data.curves.new(name + " Label", "FONT")
+    label.body = name
+    label_ob = bpy.data.objects.new(name + " Label", label)
+    bpy.context.scene.objects.link(label_ob)    
+    label_ob.location = (0, -0.5, z)
+    label_ob.scale = (0.05, 0.05, 0.05)
+    label_ob.rotation_euler = (math.pi/2, 0, math.pi/2)
+
+def import_lad(armature_ob):
+    doc = xml.etree.ElementTree.parse(CHARACTER_DIR + "avatar_lad.xml")
+    root = doc.getroot()
+    skeleton = root.find("skeleton")
+    z = -0.1
+    for param in skeleton.findall("param"):
+        import_param(armature_ob, param, z)
+        z -= 0.1
+        
+armature_ob = import_skeleton()
+import_lad(armature_ob)
