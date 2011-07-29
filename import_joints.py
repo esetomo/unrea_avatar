@@ -41,21 +41,24 @@ def import_skeleton():
     bpy.ops.object.mode_set(mode="OBJECT")
     return armature_ob
 
-def create_param_empty(param, z):
+def create_param_empty(panel, param, z):
     name = param.get("name")
     armature = armature_ob.data
     empty = bpy.data.objects.new(name, None)
     bpy.context.scene.objects.link(empty)
-    empty.scale = (0.03, 0.03, 0.03)
-    empty.location = (0, 0, z)
+    empty.scale = (3, 3, 3)
+    empty.location = (50, 0, z)
+    empty.empty_draw_type = "SPHERE"
+    empty.parent = panel
     limit_location = empty.constraints.new("LIMIT_LOCATION")
+    limit_location.owner_space = "LOCAL"
     limit_location.min_x = 0
     limit_location.use_min_x = True
-    limit_location.max_x = 0
+    limit_location.max_x = 100
     limit_location.use_max_x = True
     limit_location.min_y = 0
     limit_location.use_min_y = True
-    limit_location.max_y = 1
+    limit_location.max_y = 0
     limit_location.use_max_y = True
     limit_location.min_z = z
     limit_location.use_min_z = True
@@ -67,22 +70,25 @@ def create_param_empty(param, z):
     label.align = "RIGHT"
     label_ob = bpy.data.objects.new(name + " Label", label)
     bpy.context.scene.objects.link(label_ob)    
-    label_ob.location = (0, -0.05, z - 0.01)
-    label_ob.scale = (0.05, 0.05, 0.05)
-    label_ob.rotation_euler = (math.pi/2, 0, math.pi/2)
+    label_ob.location = (-5, 0, z - 1)
+    label_ob.scale = (5, 5, 5)
+    label_ob.rotation_euler = (math.pi/2, 0, 0)
+    label_ob.parent = panel
     
     return empty
 
 def add_scale_constraint(to, scale, value_min, value_max, target):
     c = to.constraints.new("TRANSFORM")
-    c.from_min_y = 0
-    c.from_max_y = 1
+    c.owner_space = "LOCAL"
+    c.from_min_x = 0
+    c.from_max_x = 100
     c.map_from = "LOCATION"
     c.map_to = "SCALE"
-    c.map_to_x_from = "Y"
-    c.map_to_y_from = "Y"
-    c.map_to_z_from = "Y"
+    c.map_to_x_from = "X"
+    c.map_to_y_from = "X"
+    c.map_to_z_from = "X"
     c.target = target
+    c.target_space = "LOCAL"
     c.to_min_x = 1.0 + scale[0] * value_min
     c.to_max_x = 1.0 + scale[0] * value_max
     c.to_min_y = 1.0 + scale[1] * value_min
@@ -92,14 +98,16 @@ def add_scale_constraint(to, scale, value_min, value_max, target):
 
 def add_offset_constraint(to, offset, value_min, value_max, target):
     c = to.constraints.new("TRANSFORM")
-    c.from_min_y = 0
-    c.from_max_y = 1
+    c.owner_space = "LOCAL"
+    c.from_min_x = 0
+    c.from_max_x = 100
     c.map_from = "LOCATION"
     c.map_to = "LOCATION"
-    c.map_to_x_from = "Y"
-    c.map_to_y_from = "Y"
-    c.map_to_z_from = "Y"
+    c.map_to_x_from = "X"
+    c.map_to_y_from = "X"
+    c.map_to_z_from = "X"
     c.target = target
+    c.target_space = "LOCAL"
     c.to_min_x = offset[0] * value_min
     c.to_max_x = offset[0] * value_max
     c.to_min_y = offset[1] * value_min
@@ -110,19 +118,20 @@ def add_offset_constraint(to, offset, value_min, value_max, target):
 def add_copy_constraint(to, type, target):
     c = to.constraints.new(type)
     c.target = target
+    c.target_space = "LOCAL"
     c.use_offset = True
     c.use_x = True
     c.use_y = True
     c.use_z = True
 
-def import_param_bone(armature_ob, param_empty, value_min, value_max, bone_elem):
+def import_param_bone(panel, armature_ob, param_empty, value_min, value_max, bone_elem):
     name = bone_elem.get("name")
     bone = armature_ob.pose.bones[name]
     
     # TransformConstraint hasn't use_offset property
     constraint_empty = bpy.data.objects.new(param_empty.name + bone.name, None)
     bpy.context.scene.objects.link(constraint_empty)
-    constraint_empty.hide = True
+    constraint_empty.parent = panel
     
     scale = get_vector(bone_elem, "scale")
     if scale:
@@ -134,7 +143,7 @@ def import_param_bone(armature_ob, param_empty, value_min, value_max, bone_elem)
         add_offset_constraint(constraint_empty, offset, value_min, value_max, param_empty)
         add_copy_constraint(bone, "COPY_LOCATION", constraint_empty)
 
-def import_param(armature_ob, param, z):
+def import_param(panel, armature_ob, param, z):
     skeleton = param.find("param_skeleton")
     if skeleton is None:
         return
@@ -142,11 +151,11 @@ def import_param(armature_ob, param, z):
     value_min = float(param.get("value_min"))
     value_max = float(param.get("value_max"))
     
-    param_empty = create_param_empty(param, z)
+    param_empty = create_param_empty(panel, param, z)
     bpy.ops.object.select_name(name=armature_ob.name)
     bpy.ops.object.mode_set(mode="POSE")
     for bone_elem in skeleton.findall("bone"):
-        import_param_bone(armature_ob, param_empty, value_min, value_max, bone_elem)
+        import_param_bone(panel, armature_ob, param_empty, value_min, value_max, bone_elem)
         
     bpy.ops.object.mode_set(mode="OBJECT")
 
@@ -154,10 +163,28 @@ def import_lad(armature_ob):
     doc = xml.etree.ElementTree.parse(CHARACTER_DIR + "avatar_lad.xml")
     root = doc.getroot()
     skeleton = root.find("skeleton")
-    z = -0.1
+    
+    panel = bpy.data.meshes.new("Panel")
+    panel_ob = bpy.data.objects.new("Panel", panel)
+    panel_ob.scale = (0.01, 0.01, 0.01)
+    panel_ob.rotation_euler = (0, 0, math.pi/2)
+    panel_ob.location = (0, 1, 2)
+    bpy.context.scene.objects.link(panel_ob)
+    z = -10
     for param in skeleton.findall("param"):
-        import_param(armature_ob, param, z)
-        z -= 0.1
+        import_param(panel_ob, armature_ob, param, z)
+        z -= 10
+        
+    panel.vertices.add(4)
+    panel.vertices[0].co = (-60, 0, 0)
+    panel.vertices[1].co = (105, 0, 0)
+    panel.vertices[2].co = (105, 0, z)
+    panel.vertices[3].co = (-60, 0, z)
+    panel.edges.add(4)
+    panel.edges[0].vertices = (0, 1)
+    panel.edges[1].vertices = (1, 2)
+    panel.edges[2].vertices = (2, 3)
+    panel.edges[3].vertices = (3, 0)
         
 armature_ob = import_skeleton()
 import_lad(armature_ob)
