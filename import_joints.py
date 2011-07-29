@@ -64,9 +64,10 @@ def create_param_empty(param, z):
     
     label = bpy.data.curves.new(name + " Label", "FONT")
     label.body = name
+    label.align = "RIGHT"
     label_ob = bpy.data.objects.new(name + " Label", label)
     bpy.context.scene.objects.link(label_ob)    
-    label_ob.location = (0, -0.5, z)
+    label_ob.location = (0, -0.05, z - 0.01)
     label_ob.scale = (0.05, 0.05, 0.05)
     label_ob.rotation_euler = (math.pi/2, 0, math.pi/2)
     
@@ -99,17 +100,26 @@ def add_offset_constraint(to, offset, value_min, value_max, target):
     c.map_to_y_from = "Y"
     c.map_to_z_from = "Y"
     c.target = target
-    c.to_min_x = to.location.x + offset[0] * value_min
-    c.to_max_x = to.location.x + offset[0] * value_max
-    c.to_min_y = to.location.y + offset[1] * value_min
-    c.to_max_y = to.location.y + offset[1] * value_max
-    c.to_min_z = to.location.z + offset[2] * value_min
-    c.to_max_z = to.location.z + offset[2] * value_max
+    c.to_min_x = offset[0] * value_min
+    c.to_max_x = offset[0] * value_max
+    c.to_min_y = offset[1] * value_min
+    c.to_max_y = offset[1] * value_max
+    c.to_min_z = offset[2] * value_min
+    c.to_max_z = offset[2] * value_max
+
+def add_copy_constraint(to, type, target):
+    c = to.constraints.new(type)
+    c.target = target
+    c.use_offset = True
+    c.use_x = True
+    c.use_y = True
+    c.use_z = True
 
 def import_param_bone(armature_ob, param_empty, value_min, value_max, bone_elem):
     name = bone_elem.get("name")
     bone = armature_ob.pose.bones[name]
     
+    # TransformConstraint hasn't use_offset property
     constraint_empty = bpy.data.objects.new(param_empty.name + bone.name, None)
     bpy.context.scene.objects.link(constraint_empty)
     constraint_empty.hide = True
@@ -117,22 +127,12 @@ def import_param_bone(armature_ob, param_empty, value_min, value_max, bone_elem)
     scale = get_vector(bone_elem, "scale")
     if scale:
         add_scale_constraint(constraint_empty, scale, value_min, value_max, param_empty)
-        c = bone.constraints.new("COPY_SCALE")
-        c.target = constraint_empty
-        c.use_offset = True
-        c.use_x = True
-        c.use_y = True
-        c.use_z = True
+        add_copy_constraint(bone, "COPY_SCALE", constraint_empty)
         
     offset = get_vector(bone_elem, "offset")
     if offset:
         add_offset_constraint(constraint_empty, offset, value_min, value_max, param_empty)
-        c = bone.constraints.new("COPY_LOCATION")
-        c.target = constraint_empty
-        c.use_offset = True
-        c.use_x = True
-        c.use_y = True
-        c.use_z = True
+        add_copy_constraint(bone, "COPY_LOCATION", constraint_empty)
 
 def import_param(armature_ob, param, z):
     skeleton = param.find("param_skeleton")
