@@ -43,7 +43,6 @@ def import_skeleton():
 
 def create_param_empty(param, z):
     name = param.get("name")
-    print(name)
     armature = armature_ob.data
     empty = bpy.data.objects.new(name, None)
     bpy.context.scene.objects.link(empty)
@@ -73,8 +72,8 @@ def create_param_empty(param, z):
     
     return empty
 
-def add_scale_constraint(scale, value_min, value_max, bone, empty):
-    c = bone.constraints.new("TRANSFORM")
+def add_scale_constraint(to, scale, value_min, value_max, target):
+    c = to.constraints.new("TRANSFORM")
     c.from_min_y = 0
     c.from_max_y = 1
     c.map_from = "LOCATION"
@@ -82,17 +81,16 @@ def add_scale_constraint(scale, value_min, value_max, bone, empty):
     c.map_to_x_from = "Y"
     c.map_to_y_from = "Y"
     c.map_to_z_from = "Y"
-    c.target = empty
-    c.influence = 0.1
-    c.to_min_x = 1.0 + scale[0] * value_min * 10
-    c.to_max_x = 1.0 + scale[0] * value_max * 10
-    c.to_min_y = 1.0 + scale[1] * value_min * 10
-    c.to_max_y = 1.0 + scale[1] * value_max * 10
-    c.to_min_z = 1.0 + scale[2] * value_min * 10
-    c.to_max_z = 1.0 + scale[2] * value_max * 10.
+    c.target = target
+    c.to_min_x = 1.0 + scale[0] * value_min
+    c.to_max_x = 1.0 + scale[0] * value_max
+    c.to_min_y = 1.0 + scale[1] * value_min
+    c.to_max_y = 1.0 + scale[1] * value_max
+    c.to_min_z = 1.0 + scale[2] * value_min
+    c.to_max_z = 1.0 + scale[2] * value_max
 
-def add_offset_constraint(offset, value_min, value_max, bone, empty):
-    c = bone.constraints.new("TRANSFORM")
+def add_offset_constraint(to, offset, value_min, value_max, target):
+    c = to.constraints.new("TRANSFORM")
     c.from_min_y = 0
     c.from_max_y = 1
     c.map_from = "LOCATION"
@@ -100,14 +98,41 @@ def add_offset_constraint(offset, value_min, value_max, bone, empty):
     c.map_to_x_from = "Y"
     c.map_to_y_from = "Y"
     c.map_to_z_from = "Y"
-    c.target = empty
-    c.influence = 0.1
-    c.to_min_x = bone.location.x + offset[0] * value_min * 10
-    c.to_max_x = bone.location.x + offset[0] * value_max * 10
-    c.to_min_y = bone.location.y + offset[1] * value_min * 10
-    c.to_max_y = bone.location.y + offset[1] * value_max * 10
-    c.to_min_z = bone.location.z + offset[2] * value_min * 10
-    c.to_max_z = bone.location.z + offset[2] * value_max * 10
+    c.target = target
+    c.to_min_x = to.location.x + offset[0] * value_min
+    c.to_max_x = to.location.x + offset[0] * value_max
+    c.to_min_y = to.location.y + offset[1] * value_min
+    c.to_max_y = to.location.y + offset[1] * value_max
+    c.to_min_z = to.location.z + offset[2] * value_min
+    c.to_max_z = to.location.z + offset[2] * value_max
+
+def import_param_bone(armature_ob, param_empty, value_min, value_max, bone_elem):
+    name = bone_elem.get("name")
+    bone = armature_ob.pose.bones[name]
+    
+    constraint_empty = bpy.data.objects.new(param_empty.name + bone.name, None)
+    bpy.context.scene.objects.link(constraint_empty)
+    constraint_empty.hide = True
+    
+    scale = get_vector(bone_elem, "scale")
+    if scale:
+        add_scale_constraint(constraint_empty, scale, value_min, value_max, param_empty)
+        c = bone.constraints.new("COPY_SCALE")
+        c.target = constraint_empty
+        c.use_offset = True
+        c.use_x = True
+        c.use_y = True
+        c.use_z = True
+        
+    offset = get_vector(bone_elem, "offset")
+    if offset:
+        add_offset_constraint(constraint_empty, offset, value_min, value_max, param_empty)
+        c = bone.constraints.new("COPY_LOCATION")
+        c.target = constraint_empty
+        c.use_offset = True
+        c.use_x = True
+        c.use_y = True
+        c.use_z = True
 
 def import_param(armature_ob, param, z):
     skeleton = param.find("param_skeleton")
@@ -117,18 +142,11 @@ def import_param(armature_ob, param, z):
     value_min = float(param.get("value_min"))
     value_max = float(param.get("value_max"))
     
-    empty = create_param_empty(param, z)
+    param_empty = create_param_empty(param, z)
     bpy.ops.object.select_name(name=armature_ob.name)
     bpy.ops.object.mode_set(mode="POSE")
-    for elem in skeleton.findall("bone"):
-        name = elem.get("name")
-        bone = armature_ob.pose.bones[name]
-        scale = get_vector(elem, "scale")
-        if scale:
-            add_scale_constraint(scale, value_min, value_max, bone, empty)
-        offset = get_vector(elem, "offset")
-        if offset:
-            add_offset_constraint(offset, value_min, value_max, bone, empty)
+    for bone_elem in skeleton.findall("bone"):
+        import_param_bone(armature_ob, param_empty, value_min, value_max, bone_elem)
         
     bpy.ops.object.mode_set(mode="OBJECT")
 
