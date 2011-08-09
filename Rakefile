@@ -6,7 +6,7 @@ require 'rake/clean'
 # BLENDER = 'D:\Users\s-tomo\work\blender-svn\install\win32-vc\blender.exe'
 BLENDER = 'D:\Users\s-tomo\Downloads\2164_64bit-38492\64bit-38492\blender.exe'
 
-OBJECTS = ['unrea_body', 'unrea_head']
+OBJECTS = ['unrea_body', 'unrea_head', 'unrea_head_phy']
 
 OBJECTS.each do |obj|
   dae = "out/#{obj}.dae"
