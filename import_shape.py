@@ -9,7 +9,7 @@ SHAPE = {
     'Height': 0,
     'Thickness': 0,
     'Shoulders': 0,
-    'Hip Width': 50,
+    'Hip Width': 20,
     'Hip Length': 0,
     'Torso Length': 0,
     'EyeBone_Spread': 50,
