@@ -2,7 +2,7 @@ import bpy
 import xml.etree.ElementTree
 import math
 
-CHARACTER_DIR = "/Program Files (x86)/SecondLifeViewer2/character/"
+CHARACTER_DIR = "/Program Files (x86)/SecondLifeBetaViewer/character/"
 
 SHAPE = {
     'Male_Skeleton': 0,
