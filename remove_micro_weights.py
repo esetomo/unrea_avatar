@@ -11,24 +11,8 @@ for vertex in mesh.vertices:
             group.remove([vertex.index])
 
 for vertex in mesh.vertices:
-    if len(vertex.groups) > 4:
+    if len(vertex.groups) > 2:
         for vg in vertex.groups:
             group = obj.vertex_groups[vg.group]
             print(group, vertex.index, vg.weight)
         print("")           
-        
-for vertex in mesh.vertices:
-    if len(vertex.groups) == 0:
-        print(vertex)
-
-for vertex in mesh.vertices:
-    total = 0
-    for vg in vertex.groups:
-        total += vg.weight
-    if total != 1.0:
-        print(vertex.index, total)
-        
-for vertex in mesh.vertices:
-    print(vertex.co)
-
-print("end")
